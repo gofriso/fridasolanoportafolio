@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Galería | Frida Solano</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+.gallery{
+    column-count: 3;
+    column-gap: 40px;
+    padding: 80px 60px;
+}
+
+.item{
+    break-inside: avoid;
+    margin-bottom: 40px;
+    cursor: pointer;
+}
+
+.item img{
+    width: 100%;
+    display: block;
+    border: none;
+}
+
+.caption{
+    margin-top: 8px;
+    font-size: 14px;
+    color: #2a2a2a;
+}
+
+/* LIGHTBOX */
+
+#lightbox{
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,0.75);
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+/* imagen ampliada */
+#lightbox-img{
+    max-width: 65%;
+    max-height: 75%;
+    border: none;
+}
+
+/* texto */
+#lightbox-text{
+    position: absolute;
+    bottom: 60px;
+    color: white;
+    font-size: 14px;
+}
+
+/* contador */
+#counter{
+    position: absolute;
+    right: 40px;
+    bottom: 40px;
+    color: white;
+    font-size: 14px;
+}
+
+/* flechas */
+#next{
+    position: absolute;
+    right: 40px;
+    font-size: 50px;
+    color: white;
+    cursor: pointer;
+}
+
+#prev{
+    position: absolute;
+    left: 40px;
+    font-size: 50px;
+    color: white;
+    cursor: pointer;
+}
+
+#close{
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 40px;
+    color: white;
+    cursor: pointer;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+    .gallery{
+        column-count: 2;
+    }
+}
+
+@media(max-width:600px){
+    .gallery{
+        column-count: 1;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- MENÚ (CORREGIDO) -->
+
+<header>
+    <nav>
+        <a href="index.html">Inicio</a>
+        <a href="acercademi.html">Acerca de mí</a>
+        <a href="galeria.html">Galería</a>
+        <a href="contacto.html">Contacto</a>
+    </nav>
+</header>
+
+<main class="gallery">
+
+<!-- INDIVIDUALES -->
+
+<div class="item">
+    <img src="imag/01.jpg" onclick="openImage(this.src,'01. 2020')">
+    <div class="caption">01. 2020</div>
+</div>
+
+<div class="item">
+    <img src="imag/metamorfosis.jpg" onclick="openImage(this.src,'Metamorfosis Interrumpida, 2021')">
+    <div class="caption">Metamorfosis Interrumpida, 2021</div>
+</div>
+
+<div class="item">
+    <img src="imag/pavoreal.jpg" onclick="openImage(this.src,'Pavo real, 2021')">
+    <div class="caption">Pavo real, 2021</div>
+</div>
+
+<div class="item">
+    <img src="imag/converger.jpg" onclick="openImage(this.src,'Converger, 2024')">
+    <div class="caption">Converger, 2024</div>
+</div>
+
+<!-- SERIES -->
+
+<div class="item" onclick="openSeries('autorretrato')">
+    <img src="imag/autorretrato1.jpg">
+    <div class="caption">Autorretrato, 2025</div>
+</div>
+
+<div class="item" onclick="openSeries('intimidad')">
+    <img src="imag/intimidad1.jpg">
+    <div class="caption">Intimidad, 2022</div>
+</div>
+
+<div class="item" onclick="openSeries('isra')">
+    <img src="imag/isra1.jpg">
+    <div class="caption">ISRA, 2021</div>
+</div>
+
+<div class="item" onclick="openSeries('retentiva')">
+    <img src="imag/retentiva2.jpg">
+    <div class="caption">Retentiva, 2022</div>
+</div>
+
+<div class="item" onclick="openSeries('reflejos')">
+    <img src="imag/rf1.png">
+    <div class="caption">Reflejos Fragmentados, 2024</div>
+</div>
+
+</main>
+
+<!-- LIGHTBOX -->
+
+<div id="lightbox">
+
+<span id="close" onclick="closeLightbox()">×</span>
+<span id="prev" onclick="prevImage()">←</span>
+
+<img id="lightbox-img">
+
+<div id="lightbox-text"></div>
+<div id="counter"></div>
+
+<span id="next" onclick="nextImage()">→</span>
+
+</div>
+
+<script>
+
+const series = {
+
+autorretrato: [
+"imag/autorretrato1.jpg",
+"imag/autorretrato3.jpg",
+"imag/autorretrato4.jpg"
+],
+
+intimidad: [
+"imag/intimidad1.jpg",
+"imag/intimidad2.jpg"
+],
+
+isra: [
+"imag/isra1.jpg",
+"imag/isra2.jpg",
+"imag/isra3.jpg",
+"imag/isra4.jpg",
+"imag/isra5.jpg",
+"imag/isra6.jpg"
+],
+
+retentiva: [
+"imag/retentiva2.jpg",
+"imag/retentiva3.jpg",
+"imag/retentiva4.jpg",
+"imag/retentiva5.jpg",
+"imag/retentiva6.jpg",
+"imag/retentiva7.jpg",
+"imag/retentiva8.jpg"
+],
+
+reflejos: [
+"imag/rf1.png",
+"imag/rf2.png",
+"imag/rf3.png",
+"imag/rf4.png",
+"imag/rf5.png"
+]
+
+};
+
+let currentSeries=[];
+let currentIndex=0;
+let isSingle=false;
+let currentTitle="";
+
+function openSeries(name){
+    currentSeries=series[name];
+    currentIndex=0;
+    isSingle=false;
+    document.getElementById("lightbox").style.display="flex";
+    show();
+}
+
+function openImage(src,title){
+    currentSeries=[src];
+    currentIndex=0;
+    isSingle=true;
+    currentTitle=title;
+    document.getElementById("lightbox").style.display="flex";
+    show();
+}
+
+function show(){
+    document.getElementById("lightbox-img").src=currentSeries[currentIndex];
+    document.getElementById("lightbox-text").innerText=isSingle?currentTitle:"";
+    document.getElementById("counter").innerText=(currentIndex+1)+" / "+currentSeries.length;
+}
+
+function nextImage(){
+    if(isSingle)return;
+    currentIndex=(currentIndex+1)%currentSeries.length;
+    show();
+}
+
+function prevImage(){
+    if(isSingle)return;
+    currentIndex=(currentIndex-1+currentSeries.length)%currentSeries.length;
+    show();
+}
+
+document.addEventListener("keydown",e=>{
+if(document.getElementById("lightbox").style.display!=="flex")return;
+if(e.key==="ArrowRight")nextImage();
+if(e.key==="ArrowLeft")prevImage();
+if(e.key==="Escape")closeLightbox();
+});
+
+function closeLightbox(){
+document.getElementById("lightbox").style.display="none";
+}
+
+</script>
+
+</body>
+</html>
